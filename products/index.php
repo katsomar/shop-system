@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const prevBtn = document.createElement("button");
         prevBtn.className = "page-btn";
         prevBtn.disabled = page === 1;
-        prevBtn.innerHTML = "<i data-lucide=\\'chevron-left\\' style=\\'width:16px; height:16px;\\'></i>";
+        prevBtn.innerHTML = "<i data-lucide=\'chevron-left\' style=\'width:16px; height:16px;\'></i>";
         prevBtn.addEventListener("click", () => {
             currentPage = page - 1;
             fetchProducts();
@@ -418,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const nextBtn = document.createElement("button");
         nextBtn.className = "page-btn";
         nextBtn.disabled = page === totalPages;
-        nextBtn.innerHTML = "<i data-lucide=\\'chevron-right\\' style=\\'width:16px; height:16px;\\'></i>";
+        nextBtn.innerHTML = "<i data-lucide=\'chevron-right\' style=\'width:16px; height:16px;\'></i>";
         nextBtn.addEventListener("click", () => {
             currentPage = page + 1;
             fetchProducts();
@@ -602,7 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+            .replace(/\x27/g, "&#039;");
     }
 });
 </script>
