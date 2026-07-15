@@ -237,11 +237,11 @@ switch ($action) {
             mysqli_stmt_close($po_stmt);
             
             // 2. Insert Items & update stocks if received
-            $item_sql = "INSERT INTO purchase_order_items (purchase_order_id, product_id, quantity, buying_price, subtotal) VALUES (?, ?, ?, ?, ?)";
+            $item_sql = "INSERT INTO purchase_order_items (purchase_order_id, product_id, quantity, buying_price, total) VALUES (?, ?, ?, ?, ?)";
             $item_stmt = mysqli_prepare($conn, $item_sql);
             
             $stock_stmt = mysqli_prepare($conn, "UPDATE products SET current_stock = current_stock + ? WHERE id = ?");
-            $movement_stmt = mysqli_prepare($conn, "INSERT INTO inventory_movements (product_id, movement_type, quantity, description, user_id) VALUES (?, 'Purchase', ?, ?, ?)");
+            $movement_stmt = mysqli_prepare($conn, "INSERT INTO inventory_movements (product_id, type, quantity, reference_id, notes, user_id) VALUES (?, 'Purchase', ?, ?, ?, ?)");
             
             foreach ($items as $item) {
                 // Insert PO item
@@ -256,7 +256,7 @@ switch ($action) {
                     
                     // Log movement
                     $desc = "Received Purchase Order $invoice_number";
-                    mysqli_stmt_bind_param($movement_stmt, 'iisi', $item['product_id'], $item['quantity'], $desc, $user_id);
+                    mysqli_stmt_bind_param($movement_stmt, 'iiiisi', $item['product_id'], $item['quantity'], $po_id, $desc, $user_id);
                     mysqli_stmt_execute($movement_stmt);
                 }
             }

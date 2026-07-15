@@ -168,12 +168,12 @@ switch ($action) {
             mysqli_stmt_close($up_stmt);
             
             // 2. Insert into inventory movements log
-            $log_stmt = mysqli_prepare($conn, "INSERT INTO inventory_movements (product_id, movement_type, quantity, description, user_id) VALUES (?, ?, ?, ?, ?)");
+            $log_stmt = mysqli_prepare($conn, "INSERT INTO inventory_movements (product_id, type, quantity, notes, user_id) VALUES (?, ?, ?, ?, ?)");
             mysqli_stmt_bind_param($log_stmt, 'isisi', $product_id, $movement_type, $final_qty, $desc, $user_id);
             mysqli_stmt_execute($log_stmt);
             mysqli_stmt_close($log_stmt);
             
-            log_activity($conn, 'Inventory Adjustment', "Manually adjusted stock of $name (\${adj_type} \${qty} \${unit}). Reason: \${reason}");
+            log_activity($conn, 'Inventory Adjustment', "Manually adjusted stock of $name (${adj_type} ${qty} ${unit}). Reason: ${reason}");
             
             mysqli_commit($conn);
             
@@ -202,14 +202,14 @@ switch ($action) {
         $types = "";
         
         if (!empty($search)) {
-            $where_clauses[] = "(p.name LIKE ? OR p.sku LIKE ? OR im.description LIKE ? OR u.username LIKE ?)";
+            $where_clauses[] = "(p.name LIKE ? OR p.sku LIKE ? OR im.notes LIKE ? OR u.username LIKE ?)";
             $search_val = "%$search%";
             $params = array_merge($params, [$search_val, $search_val, $search_val, $search_val]);
             $types .= "ssss";
         }
         
         if (!empty($m_type)) {
-            $where_clauses[] = "im.movement_type = ?";
+            $where_clauses[] = "im.type = ?";
             $params[] = $m_type;
             $types .= "s";
         }
@@ -231,8 +231,8 @@ switch ($action) {
         mysqli_stmt_fetch($count_stmt);
         mysqli_stmt_close($count_stmt);
         
-        // Fetch movements
-        $data_sql = "SELECT im.*, p.name as product_name, p.sku as product_sku, p.unit as product_unit, u.username as handler_name 
+        // Fetch movements with aliased names for compatibility with JS UI
+        $data_sql = "SELECT im.id, im.product_id, im.type as movement_type, im.quantity, im.reference_id, im.notes as description, im.created_at, im.user_id, p.name as product_name, p.sku as product_sku, p.unit as product_unit, u.username as handler_name 
                      FROM inventory_movements im 
                      LEFT JOIN products p ON im.product_id = p.id 
                      LEFT JOIN users u ON im.user_id = u.id 

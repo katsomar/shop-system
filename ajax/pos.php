@@ -182,18 +182,18 @@ switch ($action) {
             }
             
             // 2. Insert Sale Header
-            $sale_sql = "INSERT INTO sales (customer_id, invoice_number, sale_date, total_amount, discount, tax_amount, paid_amount, payment_status, payment_method, status, notes, created_by) 
-                         VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, 'Completed', ?, ?)";
+            $sale_sql = "INSERT INTO sales (customer_id, invoice_number, sale_date, subtotal, tax_amount, discount_amount, grand_total, paid_amount, balance_amount, payment_method, payment_status, status, notes, user_id) 
+                         VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, 'Completed', ?, ?)";
             $sale_stmt = mysqli_prepare($conn, $sale_sql);
-            mysqli_stmt_bind_param($sale_stmt, 'isddddsssi', $customer_id, $invoice_number, $grand_total, $discount, $tax_amount, $paid_amount, $payment_status, $payment_method, $notes, $user_id);
+            mysqli_stmt_bind_param($sale_stmt, 'isddddddssssi', $customer_id, $invoice_number, $subtotal, $tax_amount, $discount, $grand_total, $paid_amount, $balance, $payment_method, $payment_status, $notes, $user_id);
             mysqli_stmt_execute($sale_stmt);
             $sale_id = mysqli_insert_id($conn);
             mysqli_stmt_close($sale_stmt);
             
             // 3. Insert Sale Items, update stock and log inventory movement
-            $item_stmt = mysqli_prepare($conn, "INSERT INTO sale_items (sale_id, product_id, quantity, price, subtotal) VALUES (?, ?, ?, ?, ?)");
+            $item_stmt = mysqli_prepare($conn, "INSERT INTO sale_items (sale_id, product_id, quantity, selling_price, total) VALUES (?, ?, ?, ?, ?)");
             $stock_stmt = mysqli_prepare($conn, "UPDATE products SET current_stock = current_stock - ? WHERE id = ?");
-            $movement_stmt = mysqli_prepare($conn, "INSERT INTO inventory_movements (product_id, movement_type, quantity, description, user_id) VALUES (?, 'Sale', ?, ?, ?)");
+            $movement_stmt = mysqli_prepare($conn, "INSERT INTO inventory_movements (product_id, type, quantity, reference_id, notes, user_id) VALUES (?, 'Sale', ?, ?, ?, ?)");
             
             foreach ($items as $item) {
                 // Insert item
@@ -206,7 +206,7 @@ switch ($action) {
                 
                 // Log movement
                 $desc = "POS Sale Invoice $invoice_number";
-                mysqli_stmt_bind_param($movement_stmt, 'iisi', $item['product_id'], $item['quantity'], $desc, $user_id);
+                mysqli_stmt_bind_param($movement_stmt, 'iiiisi', $item['product_id'], $item['quantity'], $sale_id, $desc, $user_id);
                 mysqli_stmt_execute($movement_stmt);
             }
             mysqli_stmt_close($item_stmt);
