@@ -64,8 +64,8 @@ function is_page_active($path) {
             <li class="sidebar-section-title">Sales & Customers</li>
             
             <?php if (in_array($role, ['Administrator', 'Manager', 'Cashier'])): ?>
-            <li class="sidebar-item <?php echo is_page_active('/sales/pos.php'); ?>">
-                <a href="/shop-system/sales/pos.php" class="sidebar-link">
+            <li class="sidebar-item <?php echo is_page_active('/pos/index.php'); ?>">
+                <a href="/shop-system/pos/index.php" class="sidebar-link">
                     <i data-lucide="shopping-cart"></i>
                     <span>POS Terminal</span>
                 </a>

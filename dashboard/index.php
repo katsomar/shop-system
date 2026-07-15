@@ -16,7 +16,7 @@ require_once __DIR__ . '/../includes/header.php';
         <p class="text-muted text-sm" style="margin-bottom: 0;">Welcome to your Nexus Shop Management dashboard. Here is a summary of the store performance today.</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="/shop-system/sales/pos.php" class="btn btn-primary">
+        <a href="/shop-system/pos/index.php" class="btn btn-primary">
             <i data-lucide="shopping-cart" style="width:16px; height:16px;"></i> POS Terminal
         </a>
         <a href="/shop-system/products/index.php" class="btn btn-secondary">
