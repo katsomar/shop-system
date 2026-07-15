@@ -28,27 +28,32 @@ define('LOGIN_MAX_ATTEMPTS', 5);
 define('LOGIN_LOCKOUT_TIME', 15 * 60); // 15 minutes lockout
 
 // Session Settings - Security Hardening
-if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
-    
-    // Use secure cookies if HTTPS is enabled
-    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
-    ini_set('session.cookie_secure', $isSecure ? 1 : 0);
-    
-    // SameSite session cookie attribute
-    ini_set('session.cookie_samesite', 'Lax');
-    
-    session_start();
+if (php_sapi_name() !== 'cli') {
+    if (session_status() === PHP_SESSION_NONE) {
+        ini_set('session.cookie_httponly', 1);
+        ini_set('session.use_only_cookies', 1);
+        
+        // Use secure cookies if HTTPS is enabled
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                    (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        ini_set('session.cookie_secure', $isSecure ? 1 : 0);
+        
+        // SameSite session cookie attribute
+        ini_set('session.cookie_samesite', 'Lax');
+        
+        session_start();
+    }
 }
 
 // Check session timeout
-if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > SESSION_LIFETIME)) {
-    session_unset();
-    session_destroy();
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+if (php_sapi_name() !== 'cli') {
+    if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > SESSION_LIFETIME)) {
+        session_unset();
+        session_destroy();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION['timeout_message'] = 'Your session has expired due to inactivity.';
     }
-    $_SESSION['timeout_message'] = 'Your session has expired due to inactivity.';
+    $_SESSION['LAST_ACTIVITY'] = time();
 }
-$_SESSION['LAST_ACTIVITY'] = time();

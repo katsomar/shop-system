@@ -13,13 +13,21 @@ if (!$conn) {
 }
 
 // Try selecting the database
-$db_selected = @mysqli_select_db($conn, DB_NAME);
+try {
+    $db_selected = @mysqli_select_db($conn, DB_NAME);
+} catch (mysqli_sql_exception $e) {
+    $db_selected = false;
+}
 
 if (!$db_selected) {
     // Database doesn't exist, try to create it
     $sql_create_db = "CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
     if (mysqli_query($conn, $sql_create_db)) {
-        mysqli_select_db($conn, DB_NAME);
+        try {
+            mysqli_select_db($conn, DB_NAME);
+        } catch (mysqli_sql_exception $e) {
+            die("Database selection failed after creation: " . $e->getMessage());
+        }
         
         // Let's import the schema automatically if we can find it
         $schema_path = dirname(__DIR__) . '/database/schema.sql';
